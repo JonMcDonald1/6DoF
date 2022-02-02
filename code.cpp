@@ -1,54 +1,3 @@
-Skip to content
-Search or jump to…
-Pull requests
-Issues
-Marketplace
-Explore
- 
-@JonMcDonald1 
-sparkfun
-/
-SparkFun_Qwiic_6DoF_LSM6DSO_Arduino_Library
-Public
-Code
-Issues
-1
-Pull requests
-Actions
-Projects
-Wiki
-Security
-Insights
-SparkFun_Qwiic_6DoF_LSM6DSO_Arduino_Library/src/SparkFunLSM6DSO.cpp
-@edspark
-edspark Fixes argument if statement for setgyrodata rate
-…
-Latest commit 639f271 2 days ago
- History
- 1 contributor
-2108 lines (1725 sloc)  49.4 KB
-   
-/******************************************************************************
-SparkFunLSM6DSO.cpp
-LSM6DSO Arduino and Teensy Driver
-Marshall Taylor @ SparkFun Electronics
-May 20, 2015
-https://github.com/sparkfun/LSM6DSO_Breakout
-https://github.com/sparkfun/SparkFun_LSM6DSO_Arduino_Library
-Resources:
-Uses Wire.h for i2c operation
-Uses SPI.h for SPI operation
-Either can be omitted if not used
-Development environment specifics:
-Arduino IDE 1.6.4
-Teensy loader 1.23
-0
-This code is released under the [MIT License](http://opensource.org/licenses/MIT).
-Please review the LICENSE.md file included with this example. If you have any questions 
-or concerns with licensing, please contact techsupport@sparkfun.com.
-Distributed as-is; no warranty is given.
-******************************************************************************/
-
 
 #include "SparkFunLSM6DSO.h"
 
@@ -2131,15 +2080,3 @@ bool LSM6DSO::configureTap(uint8_t settings) {
   else
       return true;
 }
-© 2022 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Docs
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
