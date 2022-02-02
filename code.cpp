@@ -63,22 +63,6 @@ status_t LSM6DSOCore::readMultipleRegisters(uint8_t outputPointer[], uint8_t add
 
       return IMU_SUCCESS;
 
-    case SPI_MODE:
-
-      _spiPort->beginTransaction(mySpiSettings);
-      digitalWrite(chipSelectPin, LOW);
-
-      _spiPort->transfer(address | SPI_READ_COMMAND);
-
-      for(size_t i = 0; i < numBytes; i++ ) {
-        outputPointer[i] = _spiPort->transfer(0x00); // receive a byte as character
-      }
-
-      digitalWrite(chipSelectPin, HIGH);
-      _spiPort->endTransaction();
-
-      return IMU_SUCCESS;
-
     default:
       return IMU_GENERIC_ERROR;
 
