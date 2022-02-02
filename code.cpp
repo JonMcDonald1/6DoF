@@ -20,34 +20,7 @@ status_t LSM6DSOCore::beginCore(uint8_t deviceAddress, TwoWire &i2cPort)
 
 }
 
-status_t LSM6DSOCore::beginSPICore(uint8_t csPin, uint32_t spiPortSpeed, SPIClass &spiPort){
 
-  commInterface = SPI_MODE;
-  _spiPort = &spiPort; 
-  chipSelectPin = csPin; 
-
-#ifdef __AVR__
-    mySpiSettings = SPISettings(spiPortSpeed, MSBFIRST, SPI_MODE1);
-#endif
-		// MODE0 for Teensy 3.1 operation
-#ifdef __MK20DX256__
-    mySpiSettings = SPISettings(spiPortSpeed, MSBFIRST, SPI_MODE0);
-#endif
-		
-#ifdef ESP32
-    mySpiSettings = SPISettings(spiPortSpeed, SPI_MSBFIRST, SPI_MODE0);
-#endif
-
-  pinMode(chipSelectPin, OUTPUT);
-  digitalWrite(chipSelectPin, HIGH);
-
-	uint8_t partID;
-	readRegister(&partID, WHO_AM_I_REG);
-	if( partID != 0x6C )
-		return IMU_HW_ERROR;
-  else
-    return IMU_SUCCESS;
-}
 
 //****************************************************************************//
 //
