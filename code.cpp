@@ -144,18 +144,6 @@ status_t LSM6DSOCore::writeRegister(uint8_t address, uint8_t dataToWrite) {
         return IMU_HW_ERROR;
       break;
 
-    case SPI_MODE:
-      // take the chip select low to select the device:
-      _spiPort->beginTransaction(mySpiSettings); 
-      digitalWrite(chipSelectPin, LOW);
-
-      _spiPort->transfer(address);
-      _spiPort->transfer(dataToWrite);
-
-      digitalWrite(chipSelectPin, HIGH);
-      _spiPort->endTransaction(); 
-      break;
-
     default:
       break;
 
@@ -191,18 +179,6 @@ status_t LSM6DSOCore::writeMultipleRegisters(uint8_t inputPointer[], uint8_t add
         return IMU_HW_ERROR;
       else
         return IMU_SUCCESS;
-
-    case SPI_MODE:
-
-      _spiPort->beginTransaction(mySpiSettings);
-      digitalWrite(chipSelectPin, LOW);
-
-      _spiPort->transfer(inputPointer, 2);
-
-      digitalWrite(chipSelectPin, HIGH);
-      _spiPort->endTransaction();
-
-      return IMU_SUCCESS;
 
     default:
       return IMU_GENERIC_ERROR;
