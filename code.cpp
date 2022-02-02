@@ -1224,37 +1224,6 @@ float LSM6DSO::calcGyro( int16_t input ) {
 //  Temperature section
 //
 //****************************************************************************//
-int16_t LSM6DSO::readRawTemp()
-{
-	int16_t output;
-	readRegisterInt16( &output, OUT_TEMP_L );
-	return output;
-}  
-
-float LSM6DSO::readTempC()
-{
-	int16_t temp = (readRawTemp()); 
-  int8_t msbTemp = (temp & 0xFF00) >> 8;  
-  float tempFloat = static_cast<float>(msbTemp);
-  float lsbTemp =  temp & 0x00FF;
-
-  lsbTemp /= 256;
-  
-  tempFloat += lsbTemp; 
-	tempFloat += 25; //Add 25 degrees to remove offset
-
-	return tempFloat;
-
-}
-
-float LSM6DSO::readTempF()
-{
-	float output = readTempC(); 
-	output = (output * 9) / 5 + 32;
-
-	return output;
-
-}
 
 //****************************************************************************//
 //
