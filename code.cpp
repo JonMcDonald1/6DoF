@@ -98,19 +98,6 @@ status_t LSM6DSOCore::readRegister(uint8_t* outputPointer, uint8_t address) {
     *outputPointer = _i2cPort->read(); // receive a byte as a proper uint8_t
 
     return IMU_SUCCESS;
-
-	case SPI_MODE:
-		// take the chip select low to select the device:
-		digitalWrite(chipSelectPin, LOW);
-    _spiPort->beginTransaction(mySpiSettings); 
-
-		_spiPort->transfer(address | SPI_READ_COMMAND);
-		*outputPointer = _spiPort->transfer(0x00);
-
-		digitalWrite(chipSelectPin, HIGH);
-    _spiPort->endTransaction(); 
-		
-      return IMU_SUCCESS; 
 	
   default:
     return IMU_GENERIC_ERROR;
