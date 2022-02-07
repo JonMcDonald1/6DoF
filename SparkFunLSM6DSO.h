@@ -29,12 +29,9 @@ Distributed as-is; no warranty is given.
 
 #include <stdint.h>
 #include <Wire.h>
-#include <SPI.h>
 #include <Arduino.h>
 
 #define I2C_MODE 0
-#define SPI_MODE 1
-#define SPI_READ_COMMAND 0x80
 #define DEFAULT_ADDRESS 0x6B
 #define ALT_ADDRESS 0x6A
 
