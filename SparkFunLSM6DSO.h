@@ -57,16 +57,12 @@ public:
 
 	LSM6DSOCore();
 	status_t beginCore(uint8_t, TwoWire &i2cPort );
-	status_t beginSPICore(uint8_t, uint32_t, SPIClass &spiPort );
-	
 	status_t readMultipleRegisters(uint8_t*, uint8_t, uint8_t );
 	status_t readRegister(uint8_t*, uint8_t);
 	status_t readRegisterInt16(int16_t*, uint8_t);
 	status_t writeRegister(uint8_t, uint8_t);
 	status_t writeMultipleRegisters(uint8_t*, uint8_t, uint8_t);
   status_t enableEmbeddedFunctions(bool = true);
-
-  SPISettings mySpiSettings; 
 	
 private:
 
@@ -75,9 +71,7 @@ private:
 	uint8_t chipSelectPin;
 
   TwoWire *_i2cPort;
-  SPIClass *_spiPort;
 	
-
 };
 
 //This struct holds the settings the driver uses to do calculations
@@ -162,7 +156,6 @@ class LSM6DSO : public LSM6DSOCore
 
     LSM6DSO();
     bool begin(uint8_t deviceAddress = DEFAULT_ADDRESS, TwoWire &i2cPort = Wire);
-    bool beginSPI(uint8_t, uint32_t spiPortSpeed = 10000000, SPIClass &spiPort = SPI );
     bool initialize(uint8_t settings = BASIC_SETTINGS);
     status_t beginSettings();
 
