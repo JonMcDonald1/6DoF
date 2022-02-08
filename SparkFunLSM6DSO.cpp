@@ -253,6 +253,152 @@ bool LSM6DSO::begin(uint8_t address, TwoWire &i2cPort){
 
 
 
+bool LSM6DSO::initialize(uint8_t settings){
+
+  setIncrement();
+
+  if( settings == BASIC_SETTINGS ){
+    setAccelRange(8);
+    setAccelDataRate(416);
+    setGyroRange(500);
+    setGyroDataRate(416);
+    setBlockDataUpdate(true);
+    // enablePedometer(true);  FUTURE USE ?
+  }
+ 
+
+  return true;
+
+}
+
+status_t LSM6DSO::beginSettings() {
+
+	uint8_t dataToWrite = 0;  //Temporary variable
+
+	//Setup the accelerometer******************************
+	dataToWrite = 0; //Start Fresh!
+	if ( imuSettings.accelEnabled == 1) {
+    //Range
+		switch (imuSettings.accelRange) {
+		case 2:
+			dataToWrite |= FS_XL_2g;
+			break;
+		case 4:
+			dataToWrite |= FS_XL_4g;
+			break;
+		case 8:
+			dataToWrite |= FS_XL_8g;
+			break;
+		default:  //set default case to 16(max)
+		case 16:
+			dataToWrite |= FS_XL_16g;
+			break;
+		}
+		// Accelerometer ODR
+		switch (imuSettings.accelSampleRate) {
+		case 16:
+			dataToWrite |= ODR_XL_1_6Hz;
+			break;
+		case 125:
+			dataToWrite |= ODR_XL_12_5Hz;
+			break;
+		case 26:
+			dataToWrite |= ODR_XL_26Hz;
+			break;
+		case 52:
+			dataToWrite |= ODR_XL_52Hz;
+			break;
+		default:  //Set default to 104
+		case 104:
+			dataToWrite |= ODR_XL_104Hz;
+			break;
+		case 208:
+			dataToWrite |= ODR_XL_208Hz;
+			break;
+		case 416:
+			dataToWrite |= ODR_XL_416Hz;
+			break;
+		case 833:
+			dataToWrite |= ODR_XL_833Hz;
+			break;
+		case 1660:
+			dataToWrite |= ODR_XL_1660Hz;
+			break;
+		case 3330:
+			dataToWrite |= ODR_XL_3330Hz;
+			break;
+		case 6660:
+			dataToWrite |= ODR_XL_6660Hz;
+			break;
+		}
+	}
+
+  // Write Accelerometer Settings....
+	writeRegister(CTRL1_XL, dataToWrite);
+
+	//Setup the gyroscope**********************************************
+	dataToWrite = 0; // Clear variable
+
+	if ( imuSettings.gyroEnabled == 1) {
+		switch (imuSettings.gyroRange) {
+		case 125:
+			dataToWrite |=  FS_G_125dps;
+			break;
+		case 245:
+			dataToWrite |=  FS_G_250dps;
+			break;
+		case 500:
+			dataToWrite |=  FS_G_500dps;
+			break;
+		case 1000:
+			dataToWrite |=  FS_G_1000dps;
+			break;
+		default:  //Default to full 2000DPS range
+		case 2000:
+			dataToWrite |=  FS_G_2000dps;
+			break;
+		}
+		switch (imuSettings.gyroSampleRate) { 
+		case 125:
+			dataToWrite |= ODR_GYRO_12_5Hz;
+			break;
+		case 26:
+			dataToWrite |= ODR_GYRO_26Hz;
+			break;
+		case 52:
+			dataToWrite |= ODR_GYRO_52Hz;
+			break;
+		default:  //Set default to 104
+		case 104:
+			dataToWrite |= ODR_GYRO_104Hz;
+			break;
+		case 208:
+			dataToWrite |= ODR_GYRO_208Hz;
+			break;
+		case 416:
+			dataToWrite |= ODR_GYRO_416Hz;
+			break;
+		case 833:
+			dataToWrite |= ODR_GYRO_833Hz;
+			break;
+		case 1660:
+			dataToWrite |= ODR_GYRO_1660Hz;
+			break;
+		case 3330:
+			dataToWrite |= ODR_GYRO_3330Hz;
+			break;
+		case 6660:
+			dataToWrite |= ODR_GYRO_6660Hz;
+			break;
+		}
+	}
+	
+  // Write the gyroscope imuSettings. 
+	writeRegister(CTRL2_G, dataToWrite);
+
+	return IMU_SUCCESS;
+}
+
 // Address: 0x1E , bit[2:0]: default value is: 0x00
 // Checks if there is new accelerometer, gyro, or temperature data.
 uint8_t LSM6DSO::listenDataReady(){
@@ -1033,7 +1179,41 @@ float LSM6DSO::calcGyro( int16_t input ) {
 //
 //****************************************************************************//
 
+void LSM6DSO::fifoBeginSettings() {
 
+	//Split and mask the threshold
+	uint8_t thresholdLByte = (imuSettings.fifoThreshold & 0x007F) >> 1;
+	uint8_t thresholdHByte = (imuSettings.fifoThreshold & 0x00F0) >> 7;
+
+	//CONFIGURE FIFO_CTRL4
+	uint8_t tempFIFO_CTRL4;
+  readRegister(&tempFIFO_CTRL4, FIFO_CTRL4);
+  // Clear fifoMode bits
+  tempFIFO_CTRL4 &= 0xF8;
+  // Merge bits
+  tempFIFO_CTRL4 |= imuSettings.fifoModeWord;
+	if (imuSettings.gyroFifoEnabled == 1 | imuSettings.accelFifoEnabled == 1)
+	{
+		//Decimation is calculated as max rate between accel and gyro
+    //Clear decimation bits
+    tempFIFO_CTRL4 &= 0x3F; 
+    // Merge bits
+		tempFIFO_CTRL4 |= (imuSettings.gyroAccelDecimation << 6);
+  }
+
+	//Write the data
+	writeRegister(FIFO_CTRL1, thresholdLByte);
+  uint8_t tempVal;
+  tempVal = readRegister(&tempVal, FIFO_CTRL2);
+  // Mask threshold bytes
+  tempVal &= 0xFE;
+  // Merge bytes
+  tempVal |= thresholdHByte; 
+	writeRegister(FIFO_CTRL2, tempVal);
+
+	writeRegister(FIFO_CTRL4, tempFIFO_CTRL4);
+
+}
 
 // Address:0x0A , bit[2:0]: default value is: 0x00 (disabled).
 // Sets the fifo mode. 
@@ -1693,47 +1873,7 @@ uint8_t LSM6DSO::clearAllInt() {
       return regVal;
 }
 
-// Address:0x1C , bit[7:0]: default value is: 0x00
-// This function clears the given interrupt upon reading it from the register.  
-uint8_t LSM6DSO::clearTapInt() {
 
-  uint8_t regVal;
-  status_t returnError = readRegister(&regVal, TAP_SRC);
-  if( returnError != IMU_SUCCESS )
-      return returnError;
-  else
-      return regVal;
-}
 
-// Address: 0x57, bit[4:0]: default value is: 0x00
-// Sets the threshold for x-axis tap recognintion.
-bool LSM6DSO::setXThreshold(uint8_t thresh) {
 
-  if( thresh < 0 | thresh > 31 )
-    return false;
 
-  uint8_t regVal;
-  status_t returnError = readRegister(&regVal, TAP_CFG1);
-  regVal &= 0xE0;
-
-  regVal |= thresh;
-  returnError = writeRegister(TAP_CFG1, thresh);
-  if( returnError != IMU_SUCCESS )
-      return false;
-  else
-      return true;
-}
-
-// Address: 0x5A, bit[7:0]: default value is: 0x00
-// Sets the various tap configurations. This is a broad function that just
-// writes the entier register. 
-bool LSM6DSO::configureTap(uint8_t settings) {
-
-  uint8_t regVal;
-
-  status_t returnError =  writeRegister(INT_DUR2, settings);
-  if( returnError != IMU_SUCCESS )
-      return false;
-  else
-      return true;
-}
