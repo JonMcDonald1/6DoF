@@ -190,50 +190,10 @@ class LSM6DSO : public LSM6DSOCore
     float readFloatGyroY();
     float readFloatGyroZ();
 
-    bool setInterruptOne(uint8_t);
-    uint8_t getInterruptOne(); 
-    bool configHardOutInt(uint8_t, uint8_t pushOrDrain = 0x00) ;
-    bool setInterruptTwo(uint8_t);
-    int16_t readRawTemp();
-    float readTempC();
-    float readTempF();
-
-    void fifoBeginSettings();
-    bool setFifoMode(uint8_t);
-    uint8_t getFifoMode();
-    bool setFifoDepth(uint16_t);
-    uint16_t getFifoDepth();
-    bool setAccelBatchDataRate(uint16_t);
-    float getAccelBatchDataRate();
-    bool setGyroBatchDataRate(uint16_t);
-    float getGyroBatchDataRate();
-    void fifoClear();
-    fifoData fifoRead();
-    uint16_t getFifoStatus();
-    void fifoEnd();
-    
     float calcGyro( int16_t );
     float calcAccel( int16_t );
 
-    bool enablePedometer(bool enable = true);
-    uint8_t getPedometer();
-    uint8_t getSteps();
-    bool resetSteps();
-    bool enableTap(bool enable = true, bool xEnable = true, bool yEnable = false, bool zEnable = false) ;
-    bool setTapDirPrior(uint8_t);
-    uint8_t getTapDirPrior();
-    bool setTapClearOnRead(bool = true);
-    uint8_t getTapClearOnRead();
-    uint8_t clearTapInt();
-    bool setXThreshold(uint8_t);
-    bool listenStep();
-    bool configureTap(uint8_t);
-
-    bool routeHardInterOne(uint8_t) ;
-    bool routeHardInterTwo(uint8_t);
     bool setIncrement(bool enable = true) ;
-    bool softwareReset();
-    uint8_t clearAllInt();
 
   private:
 
