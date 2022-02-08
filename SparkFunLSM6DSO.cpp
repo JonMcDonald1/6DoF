@@ -396,18 +396,6 @@ status_t LSM6DSO::beginSettings() {
 	return IMU_SUCCESS;
 }
 
-// Address: 0x1E , bit[2:0]: default value is: 0x00
-// Checks if there is new accelerometer, gyro, or temperature data.
-uint8_t LSM6DSO::listenDataReady(){
-
-  uint8_t regVal;
-  status_t returnError = readRegister(&regVal, STATUS_REG);
-  
-  if( returnError != IMU_SUCCESS )
-    return IMU_GENERIC_ERROR;
-  else
-    return regVal; 
-}
 
 // Address:0x12 CTRL3_C , bit[6] default value is: 0x00
 // This function sets the BDU (Block Data Update) bit. Use when not employing
@@ -526,53 +514,7 @@ bool LSM6DSO::setAccelRange(uint8_t range) {
       return true;
 }
 
-// Address: 0x10 , bit[4:3]: default value is: 0x00 (2g) 
-// Gets the acceleration range of the accleromter portion of the IMU.
-// The value is dependent on the full scale bit (see getAccelFullScale).
-uint8_t LSM6DSO::getAccelRange(){
 
-  uint8_t regVal;
-  uint8_t fullScale;
-
-  status_t returnError = readRegister(&regVal, CTRL1_XL);
-  if( returnError != IMU_SUCCESS )
-    return IMU_GENERIC_ERROR;
-
-  fullScale = getAccelFullScale();  
-  regVal = (regVal & 0x0C) >> 2; 
-
-  if( fullScale == 1 ){
-    switch( regVal ){
-      case 0: 
-        return 2;
-      case 1:
-        return 2;
-      case 2:
-        return 4;
-      case 3:
-        return 8;
-      default:
-        return IMU_GENERIC_ERROR;
-      }
-    }
-  else if( fullScale == 0 ){
-    switch( regVal ){
-      case 0: 
-        return 2;
-      case 1:
-        return 16;
-      case 2:
-        return 4;
-      case 3:
-        return 8;
-      default:
-        return IMU_GENERIC_ERROR;
-      }
-  }
-  else
-    return IMU_GENERIC_ERROR;
-
-}
 
 // Address: 0x10, bit[7:4]: default value is: 0x00 (Power Down)
 // Sets the output data rate of the accelerometer there-by enabling it. 
@@ -643,54 +585,7 @@ bool LSM6DSO::setAccelDataRate(uint16_t rate) {
       return true;
 }
 
-// Address: 0x10, bit[7:4]: default value is: 0x00 (Power Down)
-// Gets the output data rate of the accelerometer checking if high performance
-// mode is enabled in which case the lowest possible data rate is 12.5Hz.
-float LSM6DSO::getAccelDataRate(){
 
-  uint8_t regVal;
-  uint8_t highPerf;
-
-  status_t returnError = readRegister(&regVal, CTRL1_XL);
-  highPerf = getAccelHighPerf();
-
-  if( returnError != IMU_SUCCESS )
-    return static_cast<float>( IMU_GENERIC_ERROR );
-
-   regVal &= ~ODR_XL_MASK; 
-
-   switch( regVal ){ 
-     case 0:
-       return ODR_XL_DISABLE;
-     case ODR_XL_1_6Hz: // Can't have 1.6 and high performance mode
-       if( highPerf == 0 )
-         return 12.5;
-       return 1.6;
-     case ODR_XL_12_5Hz:
-       return 12.5;
-     case ODR_XL_26Hz:
-       return 26.0;
-     case ODR_XL_52Hz:
-       return 52.0;
-     case ODR_XL_104Hz:
-       return 104.0;
-     case ODR_XL_208Hz:
-       return 208.0;
-     case ODR_XL_416Hz:
-       return 416.0;
-     case ODR_XL_833Hz:
-       return 833.0;
-     case ODR_XL_1660Hz:
-       return 1660.0;
-     case ODR_XL_3330Hz:
-       return 3330.0;
-     case ODR_XL_6660Hz:
-       return 6660.0;
-      default:
-        return static_cast<float>(IMU_GENERIC_ERROR);
-   }
-
-}
 
 // Address: 0x15, bit[4]: default value is: 0x00 (Enabled)
 // Checks wheter high performance is enabled or disabled. 
@@ -891,47 +786,7 @@ bool LSM6DSO::setGyroDataRate(uint16_t rate) {
       return true;
 }
 
-// Address:CTRL2_G , bit[7:4]: default value is:0x00 
-// Gets the gyro's data rate. A data rate of 0, implies that the gyro portion
-// of the IMU is disabled. 
-float LSM6DSO::getGyroDataRate(){
 
-  uint8_t regVal;
-  status_t returnError = readRegister(&regVal, CTRL2_G);
-
-  if( returnError != IMU_SUCCESS )
-    return static_cast<float>(IMU_GENERIC_ERROR);
-
-  regVal &= ~ODR_GYRO_MASK;
-
-  switch( regVal ){
-    case ODR_GYRO_DISABLE:
-      return 0.0;
-    case ODR_GYRO_12_5Hz:
-      return 12.5;
-    case ODR_GYRO_26Hz:
-      return 26.5;
-    case ODR_GYRO_52Hz:
-      return 52.0;
-    case ODR_GYRO_104Hz:
-      return 104.0;
-    case ODR_GYRO_208Hz:
-      return 208.0;
-    case ODR_GYRO_416Hz:
-      return 416.0;
-    case ODR_GYRO_833Hz:
-      return 833.0;
-    case ODR_GYRO_1660Hz:
-      return 1660.0;
-    case ODR_GYRO_3330Hz:
-      return 3330.0;
-    case ODR_GYRO_6660Hz:
-      return 6660.0;
-    default:
-      return static_cast<float>(IMU_GENERIC_ERROR);
-  }
-
-}
 
 // Address: 0x11, bit[3:0]: default value is: 0x00
 // Sets the gyroscope's range.
@@ -972,33 +827,7 @@ bool LSM6DSO::setGyroRange(uint16_t range) {
       return true;
 }
 
-// Address: 0x11, bit[3:0]: default value is: 0x00
-// Gets the gyroscope's range.
-uint16_t LSM6DSO::getGyroRange(){
 
-  uint8_t regVal;
-
-  status_t returnError = readRegister(&regVal, CTRL2_G);
-  if( returnError != IMU_SUCCESS )
-    return IMU_GENERIC_ERROR;
-
-  regVal &= ~FS_G_MASK;
-  
-  switch( regVal ){
-    case FS_G_125dps:
-      return 125;
-    case FS_G_250dps:
-      return 250;
-    case FS_G_500dps:
-      return 500;
-    case FS_G_1000dps:
-      return 1000;
-    case FS_G_2000dps:
-      return 2000;
-    default:
-      return IMU_GENERIC_ERROR;
-  }
-}
 
 int16_t LSM6DSO::readRawGyroX() {
 
